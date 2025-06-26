@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String // Hashed password
+  salt      String
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile        ElderlyProfile?
+  bookings       Booking[]
+  emergencies    Emergency[]
+  subscriptions  Subscription[]
+}
+
+model ElderlyProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  name             String
+  age              Int
+  address          String
+  healthConditions String?
+  contact          String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime
+  timeSlot  String
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Emergency {
+  id          String   @id @default(cuid())
+  userId      String
+  description String
+  status      String   @default("pending")
+  priority    String   @default("high")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  plan      String
+  status    String   @default("active")
+  startDate DateTime @default(now())
+  endDate   DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ServicePhoto {
+  id          String   @id @default(cuid())
+  url         String
+  description String?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
